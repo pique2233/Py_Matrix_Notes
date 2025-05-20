@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar Chart Example with Normalized Data</title>
+    <!-- 引入 ECharts 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+        /* 设置图表的容器 */
+        #main {
+            width: 100%;
+            height: 600px;
+        }
+        /* 设置按钮样式 */
+        #saveButton {
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="height: 100%; margin: 0; padding: 0;">
+    <div id="main"></div>
+    <button id="saveButton">Save as Image</button>
+
+    <script>
+        // 数据归一化函数
+        function normalize(data) {
+            var min = Math.min(...data);
+            var max = Math.max(...data);
+            return data.map(function(value) {
+                return (value - min) / (max - min);
+            });
+        }
+
+        // 定义原始数据
+        var rawData = {
+            LVD: [0.75, 0.70, 0.80, 0.85, 0.90, 0.80, 0.65],
+            T2V_Turbo_V2: [0.85, 0.80, 0.85, 0.75, 0.85, 0.90, 0.70],
+            ModelScope: [0.80, 0.75, 0.75, 0.80, 0.80, 0.85, 0.80],
+            VideoCrafter2: [0.70, 0.85, 0.80, 0.70, 0.75, 0.75, 0.90],
+            Gen_2: [0.60, 0.65, 0.75, 0.70, 0.80, 0.85, 0.85],
+            Gen_3: [0.90, 0.88, 0.90, 0.92, 0.95, 0.93, 0.80],
+            CogVideoX_5B: [0.85, 0.80, 0.78, 0.86, 0.92, 0.90, 0.87]
+        };
+
+        // 对每个模型数据进行归一化
+        for (var key in rawData) {
+            rawData[key] = normalize(rawData[key]);
+        }
+
+        // 雷达图数据准备
+        var normalizedData = [
+            {
+                value: rawData.LVD,
+                name: 'LVD',
+                areaStyle: { color: 'rgba(203, 131, 204, 0.3)' },
+                lineStyle: { color: '#CB83CC', type: 'solid' },
+                symbol: 'none'
+            },
+            {
+                value: rawData.T2V_Turbo_V2,
+                name: 'T2V-Turbo-V2',
+                areaStyle: { color: 'rgba(189, 174, 232, 0.3)' },
+                lineStyle: { color: '#BDAEE8', type: 'solid' },
+                symbol: 'none'
+            },
+            {
+                value: rawData.ModelScope,
+                name: 'ModelScope',
+                areaStyle: { color: 'rgba(175, 209, 250, 0.3)' },
+                lineStyle: { color: '#AFD1FA', type: 'solid' },
+                symbol: 'none'
+            },
+            {
+                value: rawData.VideoCrafter2,
+                name: 'VideoCrafter2',
+                areaStyle: { color: 'rgba(209, 227, 216, 0.3)' },
+                lineStyle: { color: '#D1E3D8', type: 'solid' },
+                symbol: 'none'
+            },
+            {
+                value: rawData.Gen_2,
+                name: 'Gen-2',
+                areaStyle: { color: 'rgba(246, 233, 203, 0.3)' },
+                lineStyle: { color: '#F6E9CB', type: 'dashed' },
+                symbol: 'none'
+            },
+            {
+                value: rawData.Gen_3,
+                name: 'Gen-3',
+                areaStyle: { color: 'rgba(138, 122, 146, 0.3)' },
+                lineStyle: { color: '#8A7A92', type: 'dashed' },
+                symbol: 'none'
+            },
+            {
+                value: rawData.CogVideoX_5B,
+                name: 'CogVideoX-5B',
+                areaStyle: { color: 'rgba(108, 90, 123, 0.3)' },
+                lineStyle: { color: '#6C5A7B', type: 'solid' },
+                symbol: 'none'
+            }
+        ];
+
+        // 雷达图配置项
+        var option = {
+            title: {
+                text: '(c) Benchmarking T2V Models',
+                subtext: 'Radar Chart',
+                left: 'center',
+                textStyle: { color: '#000000' } // 设置标题文字为黑色
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            radar: {
+                indicator: [
+                    { name: 'Motion Binding', max: 1, textStyle: { color: '#000000' } },  // 设置维度名称为黑色
+                    { name: 'Action Binding', max: 1, textStyle: { color: '#000000' } },
+                    { name: 'Object Interactions', max: 1, textStyle: { color: '#000000' } },
+                    { name: 'Spatial Relationships', max: 1, textStyle: { color: '#000000' } },
+                    { name: 'Dynamic Attr', max: 1, textStyle: { color: '#000000' } },
+                    { name: 'Consis Attr', max: 1, textStyle: { color: '#000000' } },
+                    { name: 'Generative Numeracy', max: 1, textStyle: { color: '#000000' } }
+                ],
+                shape: 'circle',
+                axisLine: { lineStyle: { color: '#ccc' } },
+                splitLine: { lineStyle: { color: '#ccc' } }
+            },
+            series: [
+                {
+                    name: 'Model Comparison',
+                    type: 'radar',
+                    data: normalizedData
+                }
+            ],
+            legend: {
+                data: ['LVD', 'T2V-Turbo-V2', 'ModelScope', 'VideoCrafter2', 'Gen-2', 'Gen-3', 'CogVideoX-5B'],
+                right: '25%',
+                top: '90%',
+                textStyle: { color: '#000000' } // 设置图例文字为黑色
+            }
+        };
+
+        // 使用配置项和数据显示图表
+        var chart = echarts.init(document.getElementById('main'));
+        chart.setOption(option);
+
+        // 保存图片功能
+        document.getElementById('saveButton').onclick = function() {
+            var dataURL = chart.getDataURL({
+                pixelRatio: 2,  // 设置图片分辨率
+                backgroundColor: '#ffffff'  // 设置背景颜色为白色
+            });
+
+            // 创建一个临时链接下载图片
+            var link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'radar_chart.png';  // 设置图片下载文件名
+            link.click();
+        };
+    </script>
+</body>
+</html>

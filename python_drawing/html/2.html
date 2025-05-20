@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <title>Multiple Radar Charts with Save Options</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
+            height: 90vh;
+        }
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+        .chart {
+            height: 100%;
+            width: 100%;
+        }
+        #saveAllButton {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div id="chart1" class="chart"></div>
+    </div>
+    <div class="chart-container">
+        <div id="chart2" class="chart"></div>
+    </div>
+    <div class="chart-container">
+        <div id="chart3" class="chart"></div>
+    </div>
+    <div class="chart-container">
+        <div id="chart4" class="chart"></div>
+    </div>
+
+    <!-- 保存全部图表的按钮 -->
+    <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);">
+        <button id="saveAllButton">Save All Charts as One Image</button>
+    </div>
+
+    <script>
+        // 定义一个创建雷达图的函数
+        function createRadarChart(domId, title) {
+            // 数据归一化函数
+            function normalize(data) {
+                var min = Math.min(...data);
+                var max = Math.max(...data);
+                return data.map(function(value) {
+                    return (value - min) / (max - min);
+                });
+            }
+
+            // 定义原始数据
+            var rawData = {
+                Model1: [0.75, 0.70, 0.80, 0.85, 0.90, 0.80, 0.65],
+                Model2: [0.85, 0.80, 0.85, 0.75, 0.85, 0.90, 0.70],
+                Model3: [0.80, 0.75, 0.75, 0.80, 0.80, 0.85, 0.80],
+                Model4: [0.70, 0.85, 0.80, 0.70, 0.75, 0.75, 0.90]
+            };
+
+            // 对每个模型数据进行归一化
+            for (var key in rawData) {
+                rawData[key] = normalize(rawData[key]);
+            }
+
+            // 雷达图数据准备
+            var normalizedData = [
+                {
+                    value: rawData.Model1,
+                    name: 'Model1',
+                    areaStyle: { color: 'rgba(203, 131, 204, 0.3)' },
+                    lineStyle: { color: '#CB83CC', type: 'solid' },
+                    symbol: 'none'
+                },
+                {
+                    value: rawData.Model2,
+                    name: 'Model2',
+                    areaStyle: { color: 'rgba(189, 174, 232, 0.3)' },
+                    lineStyle: { color: '#BDAEE8', type: 'solid' },
+                    symbol: 'none'
+                },
+                {
+                    value: rawData.Model3,
+                    name: 'Model3',
+                    areaStyle: { color: 'rgba(175, 209, 250, 0.3)' },
+                    lineStyle: { color: '#AFD1FA', type: 'solid' },
+                    symbol: 'none'
+                },
+                {
+                    value: rawData.Model4,
+                    name: 'Model4',
+                    areaStyle: { color: 'rgba(209, 227, 216, 0.3)' },
+                    lineStyle: { color: '#D1E3D8', type: 'solid' },
+                    symbol: 'none'
+                }
+            ];
+
+            // 雷达图配置项
+            var option = {
+                title: {
+                    text: title,
+                    left: 'center',
+                    textStyle: { color: '#000000' }
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                radar: {
+                    indicator: [
+                        { name: 'Motion Binding', max: 1 },
+                        { name: 'Action Binding', max: 1 },
+                        { name: 'Object Interactions', max: 1 },
+                        { name: 'Spatial Relationships', max: 1 },
+                        { name: 'Dynamic Attr', max: 1 },
+                        { name: 'Consis Attr', max: 1 },
+                        { name: 'Generative Numeracy', max: 1 }
+                    ],
+                    shape: 'circle',
+                    axisLine: { lineStyle: { color: '#ccc' } },
+                    splitLine: { lineStyle: { color: '#ccc' } }
+                },
+                series: [
+                    {
+                        name: 'Model Comparison',
+                        type: 'radar',
+                        data: normalizedData
+                    }
+                ],
+                legend: {
+                    data: ['Model1', 'Model2', 'Model3', 'Model4'],
+                    right: '25%',
+                    top: '90%',
+                    textStyle: { color: '#000000' }
+                }
+            };
+
+            // 初始化图表
+            var chart = echarts.init(document.getElementById(domId));
+            chart.setOption(option);
+        }
+
+        // 创建四个雷达图
+        createRadarChart('chart1', 'Benchmarking T2V Models 1');
+        createRadarChart('chart2', 'Benchmarking T2V Models 2');
+        createRadarChart('chart3', 'Benchmarking T2V Models 3');
+        createRadarChart('chart4', 'Benchmarking T2V Models 4');
+
+        // 添加保存全部图表的按钮功能
+        document.getElementById('saveAllButton').onclick = function() {
+            saveAllCharts();
+        };
+
+        // 保存所有图表方法
+        function saveAllCharts() {
+            // 隐藏保存按钮
+            var saveButton = document.getElementById('saveAllButton');
+            saveButton.style.display = 'none';
+
+            // 使用html2canvas捕获整个页面
+            html2canvas(document.body).then(function(canvas) {
+                var dataURL = canvas.toDataURL('image/png');
+                var link = document.createElement('a');
+                link.href = dataURL;
+                link.download = 'all_charts.png';
+                link.click();
+
+                // 重新显示保存按钮
+                saveButton.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
